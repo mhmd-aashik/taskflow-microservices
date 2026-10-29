@@ -1,12 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service.js';
+import { Controller } from '@nestjs/common';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  @EventPattern<string>('task.created.demo')
+  handleTaskCreated(
+    @Payload() data: { taskId: string; title: string },
+    @Ctx() context: RmqContext,
+  ) {
+    console.log('Task received:', data);
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+
+    channel.ack(message);
   }
 }
