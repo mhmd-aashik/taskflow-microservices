@@ -1,12 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
+import { lastValueFrom } from 'rxjs';
 import { AppService } from './app.service.js';
 
-@Controller()
+@Controller('tasks')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('demo')
+  async publishTask() {
+    await lastValueFrom(this.appService.publishTask());
+
+    return {
+      message: 'Task event published to RabbitMQ',
+    };
   }
 }
