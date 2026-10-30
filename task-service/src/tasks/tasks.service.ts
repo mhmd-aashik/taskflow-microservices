@@ -48,4 +48,18 @@ export class TasksService {
       .where(eq(tasks.createdBy, userId))
       .orderBy(desc(tasks.createdAt));
   }
+
+  async updateStatus(
+    id: string,
+    userId: string,
+    status: 'pending' | 'in_progress' | 'completed',
+  ) {
+    const [task] = await this.db
+      .update(tasks)
+      .set({ status })
+      .where(and(eq(tasks.id, id), eq(tasks.createdBy, userId)))
+      .returning();
+
+    return task ?? null;
+  }
 }

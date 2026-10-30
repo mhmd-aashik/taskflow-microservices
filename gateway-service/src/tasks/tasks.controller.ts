@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service.js';
 
 @Controller('tasks')
@@ -24,5 +32,14 @@ export class TasksController {
   @Get()
   findAll(@Headers('authorization') authorization: string | undefined) {
     return this.tasksService.findAll(authorization);
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+    @Body() body: { status: string },
+  ) {
+    return this.tasksService.updateStatus(authorization, id, body.status);
   }
 }

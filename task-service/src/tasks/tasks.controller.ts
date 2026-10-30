@@ -45,4 +45,25 @@ export class TasksController {
 
     return result;
   }
+
+  @MessagePattern('task.updateStatus')
+  async updateStatus(
+    @Payload()
+    data: {
+      id: string;
+      userId: string;
+      status: 'pending' | 'in_progress' | 'completed';
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    const task = await this.tasksService.updateStatus(
+      data.id,
+      data.userId,
+      data.status,
+    );
+
+    context.getChannelRef().ack(context.getMessage());
+
+    return task;
+  }
 }

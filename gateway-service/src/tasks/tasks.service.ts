@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -113,5 +114,49 @@ export class TasksService {
         })
         .pipe(timeout(5000)),
     );
+  }
+
+  async updateStatus(
+    authorization: string | undefined,
+    id: string,
+    status: string,
+  ) {
+    const token = authorization?.startsWith('Bearer ')
+      ? authorization.slice(7)
+      : undefined;
+
+    if (!token) {
+      throw new UnauthorizedException('Access token required');
+    }
+
+    const auth = (await this.authService.validate({
+      accessToken: token,
+    })) as { valid: boolean; userId?: string };
+
+    if (!auth.valid || !auth.userId) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    const allowedStatuses = ['pending', 'in_progress', 'completed'];
+
+    if (!allowedStatuses.includes(status)) {
+      throw new BadRequestException('Invalid task status');
+    }
+
+    const task = await firstValueFrom(
+      this.taskClient
+        .send('task.updateStatus', {
+          id,
+          userId: auth.userId,
+          status,
+        })
+        .pipe(timeout(5000)),
+    );
+
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    return task;
   }
 }
