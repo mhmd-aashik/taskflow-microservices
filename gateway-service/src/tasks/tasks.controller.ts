@@ -20,4 +20,9 @@ export class TasksController {
   ) {
     return this.tasksService.findById(authorization, id);
   }
+
+  @Get()
+  findAll(@Headers('authorization') authorization: string | undefined) {
+    return this.tasksService.findAll(authorization);
+  }
 }

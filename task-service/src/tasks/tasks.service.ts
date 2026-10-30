@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import { DB } from '../database/database.constants.js';
@@ -39,5 +39,13 @@ export class TasksService {
       .limit(1);
 
     return task ?? null;
+  }
+
+  async findAllByUser(userId: string) {
+    return this.db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.createdBy, userId))
+      .orderBy(desc(tasks.createdAt));
   }
 }

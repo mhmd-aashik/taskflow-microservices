@@ -33,4 +33,16 @@ export class TasksController {
 
     return task;
   }
+
+  @MessagePattern('task.findAll')
+  async findAll(
+    @Payload() data: { userId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    const result = await this.tasksService.findAllByUser(data.userId);
+
+    context.getChannelRef().ack(context.getMessage());
+
+    return result;
+  }
 }

@@ -88,4 +88,30 @@ export class TasksService {
 
     return task;
   }
+
+  async findAll(authorization: string | undefined) {
+    const token = authorization?.startsWith('Bearer ')
+      ? authorization.slice(7)
+      : undefined;
+
+    if (!token) {
+      throw new UnauthorizedException('Access token required');
+    }
+
+    const auth = (await this.authService.validate({
+      accessToken: token,
+    })) as { valid: boolean; userId?: string };
+
+    if (!auth.valid || !auth.userId) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    return firstValueFrom(
+      this.taskClient
+        .send('task.findAll', {
+          userId: auth.userId,
+        })
+        .pipe(timeout(5000)),
+    );
+  }
 }
