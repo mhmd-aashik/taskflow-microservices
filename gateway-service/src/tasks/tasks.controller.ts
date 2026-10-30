@@ -1,32 +1,15 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Inject,
-  Injectable,
-  Post,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { TasksService } from './tasks.service.js';
 
-@Injectable()
 @Controller('tasks')
 export class TasksController {
-  constructor(
-    @Inject('TASK_SERVICE')
-    private readonly taskClient: ClientProxy,
-  ) {}
+  constructor(private readonly tasksService: TasksService) {}
 
   @Post('demo')
-  async publishTask(
-    @Headers('authorization') authorization?: string,
-    @Body() body?: { title: string; description?: string },
+  createTask(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: { title: string; description?: string },
   ) {
-    await lastValueFrom(
-      this.taskClient.emit('task.created.demo', {
-        taskId: crypto.randomUUID(),
-        ...body,
-      }),
-    );
+    return this.tasksService.createTask(authorization, body);
   }
 }
