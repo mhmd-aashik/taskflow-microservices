@@ -16,7 +16,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           options: {
             urls: [config.getOrThrow<string>('RABBITMQ_URL')],
             queue: config.getOrThrow<string>('RABBITMQ_NOTIFICATION_QUEUE'),
-            queueOptions: { durable: true },
+            queueOptions: {
+              durable: true,
+              arguments: {
+                'x-dead-letter-exchange': 'taskflow.notifications.dlx',
+                'x-dead-letter-routing-key': 'failed',
+              },
+            },
           },
         }),
       },

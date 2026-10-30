@@ -19,11 +19,17 @@ export class NotificationsController {
     },
     @Ctx() context: RmqContext,
   ) {
-    this.logger.log(`Task created: ${data.title}`);
-    this.logger.log(`Task ID: ${data.id}`);
-    this.logger.log(`Created by: ${data.createdBy}`);
-    await this.notificationsService.sendTaskCreatedEmail(data);
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
 
-    context.getChannelRef().ack(context.getMessage());
+    try {
+      await this.notificationsService.sendTaskCreatedEmail(data);
+
+      channel.ack(message);
+    } catch (error) {
+      console.error('Email notification failed:', error);
+
+      channel.nack(message, false, false);
+    }
   }
 }

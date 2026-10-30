@@ -12,6 +12,10 @@ async function bootstrap() {
         queue: process.env.RABBITMQ_QUEUE!,
         queueOptions: {
           durable: true,
+          arguments: {
+            'x-dead-letter-exchange': 'taskflow.notifications.dlx',
+            'x-dead-letter-routing-key': 'failed',
+          },
         },
         noAck: false,
       },
