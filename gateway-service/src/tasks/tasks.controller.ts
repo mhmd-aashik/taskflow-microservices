@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Param,
@@ -41,5 +42,13 @@ export class TasksController {
     @Body() body: { status: string },
   ) {
     return this.tasksService.updateStatus(authorization, id, body.status);
+  }
+
+  @Delete(':id')
+  delete(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.tasksService.delete(authorization, id);
   }
 }

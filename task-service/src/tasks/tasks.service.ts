@@ -62,4 +62,13 @@ export class TasksService {
 
     return task ?? null;
   }
+
+  async delete(id: string, userId: string) {
+    const [task] = await this.db
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.createdBy, userId)))
+      .returning();
+
+    return task ?? null;
+  }
 }

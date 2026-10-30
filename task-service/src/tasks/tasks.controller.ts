@@ -66,4 +66,16 @@ export class TasksController {
 
     return task;
   }
+
+  @MessagePattern('task.delete')
+  async delete(
+    @Payload() data: { id: string; userId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    const task = await this.tasksService.delete(data.id, data.userId);
+
+    context.getChannelRef().ack(context.getMessage());
+
+    return task;
+  }
 }
