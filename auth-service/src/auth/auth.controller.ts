@@ -61,4 +61,16 @@ export class AuthController {
       context.getChannelRef().ack(context.getMessage());
     }
   }
+
+  @MessagePattern('auth.findById')
+  async findById(
+    @Payload() data: { userId: string },
+    @Ctx() context: RmqContext,
+  ) {
+    const user = await this.authService.findById(data.userId);
+
+    context.getChannelRef().ack(context.getMessage());
+
+    return user;
+  }
 }

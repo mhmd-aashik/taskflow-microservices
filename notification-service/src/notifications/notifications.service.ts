@@ -1,9 +1,15 @@
-
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import nodemailer from 'nodemailer';
+import { firstValueFrom, timeout } from 'rxjs';
 
 @Injectable()
 export class NotificationsService {
+  constructor(
+    @Inject('AUTH_SERVICE')
+    private readonly authClient: ClientProxy,
+  ) {}
+
   private readonly transporter = nodemailer.createTransport({
     host: 'localhost',
     port: 1025,
@@ -16,9 +22,25 @@ export class NotificationsService {
     description: string | null;
     createdBy: string;
   }) {
+    const user = await firstValueFrom(
+      this.authClient
+        .send<{
+          id: string;
+          name: string;
+          email: string;
+        } | null>('auth.findById', {
+          userId: task.createdBy,
+        })
+        .pipe(timeout(5000)),
+    );
+
+    if (!user) {
+      throw new Error(`User not found: ${task.createdBy}`);
+    }
+
     await this.transporter.sendMail({
       from: 'TaskFlow <notifications@taskflow.local>',
-      to: 'test@taskflow.local',
+      to: user.email,
       subject: `Task created: ${task.title}`,
       text: `Your task "${task.title}" was created successfully.`,
       html: `
@@ -32,7 +54,7 @@ export class NotificationsService {
             <p><strong>Status:</strong> Pending</p>
             <p><strong>Task ID:</strong> ${task.id}</p>
           </div>
-          <p>Thank you for using TaskFlow.</p>
+          <p>Thank you for using TaskFlow. ${user.name}</p>
         </div>
       `,
     });

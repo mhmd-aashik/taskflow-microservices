@@ -119,4 +119,18 @@ export class AuthService {
       };
     }
   }
+
+  async findById(userId: string) {
+    const [user] = await this.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    return user ?? null;
+  }
 }
