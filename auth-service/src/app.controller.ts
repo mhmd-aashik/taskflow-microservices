@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   Ctx,
   MessagePattern,
@@ -8,23 +9,38 @@ import {
 
 @Controller()
 export class AppController {
+  constructor(private readonly jwtService: JwtService) {}
+
   @MessagePattern('auth.login')
-  login(
+  async login(
     @Payload() data: { email: string; password: string },
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
     const message = context.getMessage();
 
-    console.log('AUTH SERVICE RECEIVED:', data);
-
     const valid =
       data.email === 'demo@taskflow.dev' && data.password === 'demo123';
 
+    if (!valid) {
+      channel.ack(message);
+
+      return {
+        success: false,
+        message: 'Invalid credentials',
+      };
+    }
+
+    const accessToken = await this.jwtService.signAsync({
+      sub: 'user-001',
+      email: data.email,
+    });
+
     channel.ack(message);
 
-    return valid
-      ? { success: true, userId: 'user-001' }
-      : { success: false, message: 'Invalid credentials' };
+    return {
+      success: true,
+      accessToken,
+    };
   }
 }
