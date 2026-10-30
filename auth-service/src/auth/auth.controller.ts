@@ -60,5 +60,5 @@ export class AuthController {
     } finally {
       context.getChannelRef().ack(context.getMessage());
     }
-  } 
+  }
 }

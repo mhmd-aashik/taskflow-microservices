@@ -1,18 +1,19 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom, timeout } from 'rxjs';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service.js';
+
+import type { RegisterPayload, LoginPayload } from './types.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    @Inject('AUTH_SERVICE')
-    private readonly authClient: ClientProxy,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  register(@Body() body: RegisterPayload) {
+    return this.authService.register(body);
+  }
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    return firstValueFrom(
-      this.authClient.send('auth.login', body).pipe(timeout(5000)),
-    );
+  login(@Body() body: LoginPayload) {
+    return this.authService.login(body);
   }
 }

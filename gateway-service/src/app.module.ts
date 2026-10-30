@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth/auth.controller.js';
 import { TasksController } from './tasks/tasks.controller.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -21,18 +22,8 @@ import { TasksController } from './tasks/tasks.controller.js';
           },
         },
       },
-      {
-        name: 'AUTH_SERVICE',
-        transport: Transport.RMQ,
-        options: {
-          urls: [process.env.RABBITMQ_URL!],
-          queue: process.env.RABBITMQ_AUTH_QUEUE!,
-          queueOptions: {
-            durable: true,
-          },
-        },
-      },
     ]),
+    AuthModule,
   ],
   controllers: [AuthController, TasksController],
 })
