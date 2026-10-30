@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthService } from '../auth/auth.service.js';
 import { firstValueFrom, timeout } from 'rxjs';
@@ -46,5 +51,41 @@ export class TasksService {
       success: true,
       task,
     };
+  }
+
+  async findById(authorization: string | undefined, id: string) {
+    const token = authorization?.startsWith('Bearer ')
+      ? authorization.slice(7)
+      : undefined;
+
+    if (!token) {
+      throw new UnauthorizedException('Access token required');
+    }
+
+    const auth = (await this.authService.validate({
+      accessToken: token,
+    })) as { valid: boolean; userId?: string };
+
+    if (!auth.valid || !auth.userId) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    const task = await firstValueFrom(
+      this.taskClient
+        .send<{
+          id: string;
+          createdBy: string;
+          title: string;
+          description: string | null;
+          status: string;
+        } | null>('task.findById', { id })
+        .pipe(timeout(5000)),
+    );
+
+    if (!task || task.createdBy !== auth.userId) {
+      throw new NotFoundException('Task not found');
+    }
+
+    return task;
   }
 }

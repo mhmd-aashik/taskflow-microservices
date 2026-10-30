@@ -21,4 +21,13 @@ export class TasksController {
 
     return task;
   }
+
+  @MessagePattern('task.findById')
+  async findById(@Payload() data: { id: string }, @Ctx() context: RmqContext) {
+    const task = await this.tasksService.findById(data.id);
+
+    context.getChannelRef().ack(context.getMessage());
+
+    return task;
+  }
 }
