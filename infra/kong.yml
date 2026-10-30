@@ -8,3 +8,8 @@ services:
         paths:
           - /tasks
         strip_path: false
+
+      - name: taskflow-auth
+        paths:
+          - /auth
+        strip_path: false
