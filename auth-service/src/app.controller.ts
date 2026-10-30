@@ -43,4 +43,33 @@ export class AppController {
       accessToken,
     };
   }
+
+  @MessagePattern('auth.validate')
+  async validate(
+    @Payload() data: { accessToken: string },
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+      }>(data.accessToken);
+
+      return {
+        valid: true,
+        userId: payload.sub,
+        email: payload.email,
+      };
+    } catch {
+      return {
+        valid: false,
+        message: 'Invalid or expired token',
+      };
+    } finally {
+      channel.ack(message);
+    }
+  }
 }
