@@ -78,7 +78,7 @@ export class TasksService {
           title: string;
           description: string | null;
           status: string;
-        } | null>('task.findById', { id })
+        } | null>('task.findById', { id, userId: auth.userId })
         .pipe(timeout(5000)),
     );
 
