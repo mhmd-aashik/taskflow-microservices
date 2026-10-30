@@ -8,11 +8,11 @@ export class AppController {
     @Payload() data: { taskId: string; title: string },
     @Ctx() context: RmqContext,
   ) {
-    console.log('Task received:', data);
-
     const channel = context.getChannelRef();
     const message = context.getMessage();
 
     channel.ack(message);
+
+    return { message: 'Task received' };
   }
 }

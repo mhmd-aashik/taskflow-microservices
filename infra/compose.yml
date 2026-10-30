@@ -31,6 +31,27 @@ services:
     volumes:
       - ./kong.yml:/kong/declarative/kong.yml:ro
 
+  postgres:
+    image: postgres:17-alpine
+    container_name: taskflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taskflow
+      POSTGRES_PASSWORD: taskflow123
+      POSTGRES_DB: taskflow_auth
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U taskflow -d taskflow_auth
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   rabbitmq_data:
   kong_data:
+  postgres_data:
