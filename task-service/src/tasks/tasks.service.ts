@@ -4,6 +4,8 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import { DB } from '../database/database.constants.js';
 import { tasks } from '../database/schema/task.schema.js';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 export type CreateTaskPayload = {
   title: string;
@@ -16,6 +18,9 @@ export class TasksService {
   constructor(
     @Inject(DB)
     private readonly db: PostgresJsDatabase,
+
+    @Inject('NOTIFICATION_SERVICE')
+    private readonly notificationClient: ClientProxy,
   ) {}
 
   async create(data: CreateTaskPayload) {
@@ -27,6 +32,19 @@ export class TasksService {
         createdBy: data.createdBy,
       })
       .returning();
+
+    if (!task) {
+      throw new Error('Failed to create task');
+    }
+
+    await firstValueFrom(
+      this.notificationClient.emit('task.created', {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        createdBy: task.createdBy,
+      }),
+    );
 
     return task;
   }

@@ -8,6 +8,7 @@ import { TaskModule } from './tasks/tasks.module.js';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
     DatabaseModule,
     TaskModule,
   ],
