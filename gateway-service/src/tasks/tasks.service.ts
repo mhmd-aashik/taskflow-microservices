@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthService } from '../auth/auth.service.js';
-import { randomUUID } from 'node:crypto';
+import { firstValueFrom, timeout } from 'rxjs';
 
 @Injectable()
 export class TasksService {
@@ -32,18 +32,18 @@ export class TasksService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const task = {
-      taskId: randomUUID(),
-      title: body.title,
-      description: body.description,
-      createdBy: auth.userId,
-    };
-
-    await this.taskClient.emit('task.created.demo', task).toPromise();
+    const task = await firstValueFrom(
+      this.taskClient
+        .send('task.create', {
+          title: body.title,
+          description: body.description,
+          createdBy: auth.userId,
+        })
+        .pipe(timeout(5000)),
+    );
 
     return {
       success: true,
-      message: 'Task event published',
       task,
     };
   }
