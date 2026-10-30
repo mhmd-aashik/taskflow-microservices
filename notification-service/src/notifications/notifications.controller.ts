@@ -1,12 +1,15 @@
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
+import { NotificationsService } from './notifications.service.js';
 
 @Controller()
 export class NotificationsController {
   private readonly logger = new Logger(NotificationsController.name);
 
+  constructor(private readonly notificationsService: NotificationsService) {}
+
   @EventPattern<string>('task.created')
-  handleTaskCreated(
+  async handleTaskCreated(
     @Payload()
     data: {
       id: string;
@@ -19,6 +22,7 @@ export class NotificationsController {
     this.logger.log(`Task created: ${data.title}`);
     this.logger.log(`Task ID: ${data.id}`);
     this.logger.log(`Created by: ${data.createdBy}`);
+    await this.notificationsService.sendTaskCreatedEmail(data);
 
     context.getChannelRef().ack(context.getMessage());
   }
