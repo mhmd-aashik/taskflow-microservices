@@ -14,7 +14,7 @@ import { TasksService } from './tasks.service.js';
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
-  @Post('demo')
+  @Post()
   createTask(
     @Headers('authorization') authorization: string | undefined,
     @Body() body: { title: string; description?: string },

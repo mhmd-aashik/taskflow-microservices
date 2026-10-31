@@ -1,15 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
+import { setupRabbitMQTopology } from './rabbitmq/rabbitmq-topology.js';
 
 async function bootstrap() {
+  const config = new ConfigService();
+  const rabbitmqUrl = config.getOrThrow<string>('RABBITMQ_URL');
+
+  await setupRabbitMQTopology(rabbitmqUrl);
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.RMQ,
       options: {
-        urls: [process.env.RABBITMQ_URL!],
-        queue: process.env.RABBITMQ_QUEUE!,
+        urls: [rabbitmqUrl],
+        queue: 'taskflow.notifications',
         queueOptions: {
           durable: true,
           arguments: {
@@ -24,4 +31,5 @@ async function bootstrap() {
 
   await app.listen();
 }
+
 await bootstrap();
