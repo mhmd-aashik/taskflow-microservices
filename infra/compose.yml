@@ -75,6 +75,23 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  auth-service:
+    build:
+      context: ../auth-service
+      dockerfile: Dockerfile
+    container_name: taskflow-auth-service
+    restart: unless-stopped
+    env_file:
+      - ../auth-service/.env
+    environment:
+      DATABASE_URL: postgresql://taskflow:taskflow123@postgres:5432/taskflow_auth
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   rabbitmq_data:
   kong_data:
