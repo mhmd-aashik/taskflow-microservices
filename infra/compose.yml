@@ -58,6 +58,23 @@ services:
       - "127.0.0.1:8025:8025"
       - "127.0.0.1:1025:1025"
 
+  task-service:
+    build:
+      context: ../task-service
+      dockerfile: Dockerfile
+    container_name: taskflow-task-service
+    restart: unless-stopped
+    env_file:
+      - ../task-service/.env
+    environment:
+      DATABASE_URL: postgresql://taskflow:taskflow123@postgres:5432/taskflow_tasks
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   rabbitmq_data:
   kong_data:
