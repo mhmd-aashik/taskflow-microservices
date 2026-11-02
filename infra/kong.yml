@@ -2,7 +2,8 @@ _format_version: "3.0"
 
 services:
   - name: taskflow-gateway
-    url: http://host.docker.internal:3000
+    # url: http://host.docker.internal:3000
+    url: http://gateway-service:3000
     routes:
       - name: taskflow-tasks
         paths:

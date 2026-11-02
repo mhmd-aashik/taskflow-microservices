@@ -30,6 +30,9 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - ./kong.yml:/kong/declarative/kong.yml:ro
+    depends_on:
+      gateway-service:
+        condition: service_started
 
   postgres:
     image: postgres:17-alpine
@@ -89,6 +92,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  gateway-service:
+    build:
+      context: ../gateway-service
+      dockerfile: Dockerfile
+    container_name: taskflow-gateway-service
+    restart: unless-stopped
+    env_file:
+      - ../gateway-service/.env
+    environment:
+      PORT: "3000"
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    expose:
+      - "3000"
+    depends_on:
       rabbitmq:
         condition: service_healthy
 
