@@ -23,6 +23,12 @@ spec:
           ports:
             - containerPort: 80
 
+          envFrom:
+            - configMapRef:
+                name: nginx-config
+            - secretRef:
+                name: taskflow-demo-secret
+
           resources:
             requests:
               cpu: "50m"
