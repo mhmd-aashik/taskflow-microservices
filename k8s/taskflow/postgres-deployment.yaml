@@ -8,6 +8,9 @@ metadata:
 spec:
   replicas: 1
 
+  strategy:
+    type: Recreate
+
   selector:
     matchLabels:
       app: postgres
@@ -25,13 +28,17 @@ spec:
           ports:
             - containerPort: 5432
 
+          envFrom:
+            - secretRef:
+                name: postgres-credentials
+
           env:
-            - name: POSTGRES_USER
-              value: "taskflow"
-            - name: POSTGRES_PASSWORD
-              value: "taskflow-dev-123"
-            - name: POSTGRES_DB
-              value: "taskflow_auth"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
 
           resources:
             requests:
@@ -40,3 +47,8 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
