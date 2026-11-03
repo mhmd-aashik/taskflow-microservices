@@ -25,6 +25,7 @@ spec:
           envFrom:
             - secretRef:
                 name: rabbitmq-credentials
+
           ports:
             - containerPort: 5672
             - containerPort: 15672
