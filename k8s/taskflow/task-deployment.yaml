@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
         - name: task
-          image: taskflow-task-service:local
+          # image: taskflow-task-service:local
+          image: taskflow-task-service:debug1kubectl apply -f task-deployment.yaml
           imagePullPolicy: Never
 
           envFrom:

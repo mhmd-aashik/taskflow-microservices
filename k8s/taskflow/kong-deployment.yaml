@@ -1,19 +1,44 @@
-containers:
-  - name: kong
-    image: kong:3.9
-    ports:
-      - containerPort: 8000
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "128Mi"
-      limits:
-        cpu: "500m"
-        memory: "512Mi"
-    env:
-      - name: KONG_DATABASE
-        value: "off"
-      - name: KONG_DECLARATIVE_CONFIG
-        value: /etc/kong/kong.yml
-      - name: KONG_PROXY_LISTEN
-        value: "0.0.0.0:8000"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: taskflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - name: kong
+          image: kong:3.9
+          ports:
+            - containerPort: 8000
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: "/etc/kong/kong.yml"
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+          volumeMounts:
+            - name: kong-config
+              mountPath: /etc/kong/kong.yml
+              subPath: kong.yml
+              readOnly: true
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-config
