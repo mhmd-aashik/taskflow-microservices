@@ -32,8 +32,13 @@ spec:
             - name: PORT
               value: "3000"
 
+            # - name: RABBITMQ_URL
+            #   value: "amqp://taskflow:taskflow-dev-123@rabbitmq:5672"
             - name: RABBITMQ_URL
-              value: "amqp://taskflow:taskflow-dev-123@rabbitmq:5672"
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-rabbitmq
+                  key: RABBITMQ_URL
 
             - name: RABBITMQ_TASK_QUEUE
               value: "taskflow.tasks"
