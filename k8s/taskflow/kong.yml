@@ -1,0 +1,15 @@
+_format_version: "3.0"
+
+services:
+  - name: taskflow-gateway
+    url: http://gateway-service:3000
+    routes:
+      - name: auth-route
+        paths:
+          - /auth
+        strip_path: false
+
+      - name: tasks-route
+        paths:
+          - /tasks
+        strip_path: false

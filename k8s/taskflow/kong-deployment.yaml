@@ -1,0 +1,19 @@
+containers:
+  - name: kong
+    image: kong:3.9
+    ports:
+      - containerPort: 8000
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+    env:
+      - name: KONG_DATABASE
+        value: "off"
+      - name: KONG_DECLARATIVE_CONFIG
+        value: /etc/kong/kong.yml
+      - name: KONG_PROXY_LISTEN
+        value: "0.0.0.0:8000"
