@@ -10,9 +10,15 @@ export class NotificationsService {
     private readonly authClient: ClientProxy,
   ) {}
 
+  // private readonly transporter = nodemailer.createTransport({
+  //   host: 'localhost',
+  //   port: 1025,
+  //   secure: false,
+  // });
+
   private readonly transporter = nodemailer.createTransport({
-    host: 'localhost',
-    port: 1025,
+    host: process.env.SMTP_HOST ?? 'localhost',
+    port: Number(process.env.SMTP_PORT ?? 1025),
     secure: false,
   });
 

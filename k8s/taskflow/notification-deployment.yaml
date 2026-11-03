@@ -30,6 +30,10 @@ spec:
               value: "production"
             - name: RABBITMQ_QUEUE
               value: "taskflow.notifications"
+            - name: SMTP_HOST
+              value: "mailpit"
+            - name: SMTP_PORT
+              value: "1025"
 
           resources:
             requests:

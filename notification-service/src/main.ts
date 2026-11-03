@@ -15,8 +15,8 @@ async function bootstrap() {
     {
       transport: Transport.RMQ,
       options: {
-        urls: [rabbitmqUrl],
-        queue: 'taskflow.notifications',
+        urls: [process.env.RABBITMQ_URL!],
+        queue: process.env.RABBITMQ_QUEUE!,
         queueOptions: {
           durable: true,
           arguments: {

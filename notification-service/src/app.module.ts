@@ -15,7 +15,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'AUTH_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://taskflow:taskflow123@localhost:5672'],
+          urls: [process.env.RABBITMQ_URL!],
           queue: 'taskflow.auth',
           queueOptions: {
             durable: true,
